@@ -636,3 +636,39 @@ class Minikazam(PretrainedModel):
             "MetamonPerceiverTstepEncoder.tokenizer": self.tokenizer,
             "amago.nets.transformer.SigmaReparam.fast_init": True,
         }
+
+
+##############################################
+## 100% Correct PokéAgent Challenge Aliases ##
+##############################################
+
+# These policies use the unpatched observation space. They will play (slightly) better
+# than the main version when the backend is correctly specified as "pokeagent", because
+# they can see the tera types that appear when the agent or opponent uses tera in battle.
+
+
+@pretrained_model("PAC-SmallRLGen9Beta")
+class PACSmallRLGen9Beta(SmallRLGen9Beta):
+    def __init__(self):
+        super().__init__()
+        self.observation_space.base_obs_space = get_observation_space(
+            "TeamPreviewObservationSpace"
+        )
+
+
+@pretrained_model("PAC-Abra")
+class PACAbra(Abra):
+    def __init__(self):
+        super().__init__()
+        self.observation_space.base_obs_space = get_observation_space(
+            "TeamPreviewObservationSpace"
+        )
+
+
+@pretrained_model("PAC-Minikazam")
+class PACMinikazam(Minikazam):
+    def __init__(self):
+        super().__init__()
+        self.observation_space.base_obs_space = get_observation_space(
+            "OpponentMoveObservationSpace"
+        )
