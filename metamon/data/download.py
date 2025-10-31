@@ -17,7 +17,7 @@ else:
 
 LATEST_RAW_REPLAY_REVISION = "v4"
 LATEST_PARSED_REPLAY_REVISION = "v4"
-LATEST_TEAMS_REVISION = "v3"
+LATEST_TEAMS_REVISION = "v4"
 LATEST_USAGE_STATS_REVISION = "v2"
 
 
@@ -338,7 +338,7 @@ Specific version to download. Defaults to latest version.
 Available versions:
     raw-replays: v1, v2, v3, v4
     parsed-replays: v0 (deprecated) v1, v2, v3-beta, v3, v4
-    teams: v0, v1, v2, v3
+    teams: v0, v1, v2, v3, v4
     usage-stats: v0, v1, v2
     
     The huggingface READMEs have changelogs.
@@ -376,7 +376,7 @@ Available versions:
             raise ValueError("Must specify at least one set name (e.g., gen1ou)")
         set_names = ["competitive", "paper_variety", "paper_replays"]
         if version > "v0":
-            set_names.append("modern_replays")
+            set_names += ["modern_replays", "modern_replays_v2"]
         for set_name in set_names:
             for format in args.formats:
                 if "ou" not in format and "replays" in set_name:

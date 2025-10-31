@@ -3,6 +3,7 @@ import os
 import copy
 import json
 import warnings
+import warnings
 from datetime import datetime
 from typing import Optional, Type, Any, List
 
@@ -29,7 +30,7 @@ from metamon.interface import (
 )
 from metamon.data import DATA_PATH
 from metamon.data.download import download_teams
-from metamon.env.metamon_player import MetamonPlayer, PokeAgentPlayer
+from metamon.env.metamon_player import MetamonPlayer
 
 
 METAMON_TEAM_SETS = {
@@ -562,7 +563,6 @@ class PokeAgentLadder(QueueOnLocalLadder):
         Unlike a regular RL eval, creating an episode that you won't finish is a big problem because
         it will lead to a loss and a drop in rating. Test with `QueueOnLocalLadder` first!
     """
-
     # increases time to launch opponent envs before ladder loop times out ("Agent is not challenging").
     # may need to be especially long for PokéAgent because it takes some time for your Elo search radius
     # to expand to active players... depending on who is online and what your Elo is.
