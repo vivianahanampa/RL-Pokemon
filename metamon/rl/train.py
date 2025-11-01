@@ -175,6 +175,7 @@ def create_offline_dataset(
         "max_seq_len": None,
         "formats": formats,
         "verbose": verbose,  # False to hide dset setup progress bar
+        "use_cached_filenames": False,  # Switch to True to save a lot of time on startup when reusing an identical training set
     }
     parsed_replays_amago = MetamonAMAGODataset(
         dset_name="Metamon Parsed Replays",

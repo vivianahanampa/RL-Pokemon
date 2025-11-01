@@ -560,6 +560,9 @@ class MetamonAMAGODataset(RLDataset):
 
     def sample_random_trajectory(self) -> RLData:
         data = self.parsed_replay_dset.random_sample()
+        return self._process_data(data)
+
+    def _process_data(self, data):
         obs, action_infos, rewards, dones = data
         # amago expects discrete actions to be one-hot encoded
         num_actions = self.parsed_replay_dset.action_space.gym_space.n

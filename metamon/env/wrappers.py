@@ -3,6 +3,7 @@ import os
 import copy
 import json
 import warnings
+import warnings
 from datetime import datetime
 from typing import Optional, Type, Any, List
 
@@ -291,9 +292,11 @@ class PokeEnvWrapper(OpenAIGymEnv):
             player_class = Player
         elif battle_backend == "metamon":
             player_class = MetamonPlayer
+        elif battle_backend == "pokeagent":
+            player_class = PokeAgentPlayer
         else:
             raise ValueError(
-                f"Invalid battle backend: {battle_backend}. Options are 'poke-env' or 'metamon'."
+                f"Invalid battle backend: {battle_backend}. Options are 'poke-env', 'metamon', or 'pokeagent'."
             )
 
         super().__init__(
@@ -573,7 +576,4 @@ class PokeAgentLadder(QueueOnLocalLadder):
         assert (
             self.player_username is not None and self.player_password is not None
         ), "Username and password are required for PokéAgent laddering"
-        assert self.player_username.startswith(
-            "PAC"
-        ), "Bot usernames should start with 'PAC'"
         super().start_laddering(n_challenges)

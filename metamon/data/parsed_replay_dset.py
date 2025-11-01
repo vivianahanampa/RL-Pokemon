@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import csv
 import copy
 from typing import Optional, Dict, Tuple, List, Any, Set
 from datetime import datetime
@@ -88,6 +89,9 @@ class ParsedReplayDataset(Dataset):
             the current version of the parsed replays dataset.
         max_seq_len: The maximum sequence length to load. Trajectories are randomly sliced to this length.
         verbose: Whether to print progress bars while loading large datasets.
+        shuffle: Whether to shuffle the filenames. Defaults to False.
+        use_cached_filenames: Whether to use the cached filenames from a manifest.csv file saved during a previous experiment with this replay directory.
+            Saves time on startup of large training runs. Defaults to False.
     """
 
     def __init__(
@@ -105,6 +109,7 @@ class ParsedReplayDataset(Dataset):
         max_seq_len: Optional[int] = None,
         verbose: bool = False,
         shuffle: bool = False,
+        use_cached_filenames: bool = False,
     ):
         formats = formats or metamon.SUPPORTED_BATTLE_FORMATS
 
@@ -127,7 +132,18 @@ class ParsedReplayDataset(Dataset):
         self.verbose = verbose
         self.max_seq_len = max_seq_len
         self.shuffle = shuffle
-        self.refresh_files()
+        self.manifest_path = os.path.join(self.dset_root, "manifest.csv")
+        if os.path.exists(self.manifest_path) and use_cached_filenames:
+            with open(self.manifest_path, "r") as f:
+                reader = csv.reader(f)
+                next(reader)
+                self.filenames = [row[0] for row in reader]
+            if verbose:
+                print(f"Loaded {len(self.filenames)} battles from {self.manifest_path}")
+            if shuffle:
+                random.shuffle(self.filenames)
+        else:
+            self.refresh_files()
 
     def parse_battle_date(self, filename: str) -> datetime:
         # parsed replays saved by our own gym env will have hour/minute/sec
@@ -212,11 +228,20 @@ class ParsedReplayDataset(Dataset):
                             continue
                     except ValueError:
                         continue
-
                 self.filenames.append(os.path.join(path, filename))
 
         if self.shuffle:
             random.shuffle(self.filenames)
+
+        with open(self.manifest_path, "w") as f:
+            if self.verbose:
+                print(
+                    f"Writing {self.manifest_path} with {len(self.filenames)} battles"
+                )
+            writer = csv.writer(f)
+            writer.writerow(["filename"])  # Write header row
+            for filename in self.filenames:
+                writer.writerow([filename])
 
         if self.verbose:
             print(f"Dataset contains {len(self.filenames)} battles")

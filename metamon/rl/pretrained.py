@@ -104,6 +104,12 @@ class PretrainedModel:
         default_checkpoint: Default checkpoint epoch to load. 40 corresponds to
             approximately 1M gradient steps with original paper training settings.
         gin_overrides: Optional dictionary of one-off gin overrides if there's a small tweak to an existing config file.
+        battle_backend: The correct default battle backend to use during evaluations of this agent.
+            Should indicate a version of the backend pokemon logic that mostly closely replicates the
+            version used to collect data and/or reconstruct replays for training.
+                'poke-env' is deprecated; maintains the original paper's models.
+                'metamon' is the lateset version
+                'pokeagent' maintains policies trained (and used as the organizer baselines) during the PokéAgent Challenge
     """
 
     HF_REPO_ID = "jakegrigsby/metamon"
@@ -122,10 +128,12 @@ class PretrainedModel:
         hf_cache_dir: Optional[str] = None,
         default_checkpoint: int = 40,
         gin_overrides: Optional[dict] = None,
+        battle_backend: str = "poke-env",
     ):
         self.model_name = model_name
         self.model_gin_config = model_gin_config
         self.train_gin_config = train_gin_config
+        self.battle_backend = battle_backend
         self.model_gin_config_path = os.path.join(
             metamon.rl.MODEL_CONFIG_DIR, self.model_gin_config
         )
@@ -262,10 +270,12 @@ class LocalFinetunedModel(LocalPretrainedModel):
         default_checkpoint: int,
         train_gin_config: Optional[str] = None,
         reward_function: Optional[RewardFunction] = None,
+        battle_backend: Optional[str] = None,
     ):
         base_model = base_model()
         train_gin_config = train_gin_config or base_model.train_gin_config
         reward_function = reward_function or base_model.reward_function
+        battle_backend = battle_backend or base_model.battle_backend
         super().__init__(
             amago_ckpt_dir=amago_ckpt_dir,
             model_name=model_name,
@@ -276,6 +286,7 @@ class LocalFinetunedModel(LocalPretrainedModel):
             observation_space=base_model.observation_space,
             action_space=base_model.action_space,
             reward_function=reward_function,
+            battle_backend=battle_backend,
         )
 
 
@@ -293,6 +304,7 @@ class SmallIL(PretrainedModel):
             train_gin_config="il.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -305,6 +317,7 @@ class SmallILFA(PretrainedModel):
             train_gin_config="il.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -317,6 +330,7 @@ class SmallRL(PretrainedModel):
             train_gin_config="exp_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -345,6 +359,7 @@ class SmallRL_BinaryFilter(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -357,6 +372,7 @@ class SmallRL_Aug(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -369,6 +385,7 @@ class SmallRL_MaxQ(PretrainedModel):
             train_gin_config="binary_maxq_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -381,6 +398,7 @@ class MediumIL(PretrainedModel):
             train_gin_config="il.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -393,6 +411,7 @@ class MediumRL(PretrainedModel):
             train_gin_config="exp_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -405,6 +424,7 @@ class MediumRL_Aug(PretrainedModel):
             train_gin_config="exp_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -417,6 +437,7 @@ class MediumRL_MaxQ(PretrainedModel):
             train_gin_config="binary_maxq_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -429,6 +450,7 @@ class LargeRL(PretrainedModel):
             train_gin_config="exp_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -441,6 +463,7 @@ class LargeIL(PretrainedModel):
             train_gin_config="il.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -453,6 +476,7 @@ class SyntheticRLV0(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -465,6 +489,7 @@ class SyntheticRLV1(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -477,6 +502,7 @@ class SyntheticRLV1_SelfPlay(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=48,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -489,6 +515,7 @@ class SyntheticRLV1_PlusPlus(PretrainedModel):
             train_gin_config="binary_maxq_rl.gin",
             default_checkpoint=38,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
@@ -501,12 +528,19 @@ class SyntheticRLV2(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=48,
             action_space=get_action_space("MinimalActionSpace"),
+            battle_backend="poke-env",
         )
 
 
 ###################################
 ## PokéAgent Challenge Policies ###
 ###################################
+
+
+"""
+"PAC-" prefixed observation spaces trigger a hack to reintroduce a bug that impacted models trained during the challenge.
+For now, this lets these policies continue to collect reasonable trajectories for the "metamon" battle backend.
+"""
 
 
 @pretrained_model()
@@ -530,7 +564,7 @@ class SmallRLGen9Beta(PretrainedModel):
             # trained for more than 24 total epochs...
             default_checkpoint=24,
             action_space=get_action_space("DefaultActionSpace"),
-            observation_space=get_observation_space("TeamPreviewObservationSpace"),
+            observation_space=get_observation_space("PAC-TeamPreviewObservationSpace"),
             tokenizer=get_tokenizer("DefaultObservationSpace-v1"),
             # temporarily forced to flash attention until we can verify numerical stability
             # of a switch to a standard pytorch sliding window inference alternative
@@ -538,6 +572,7 @@ class SmallRLGen9Beta(PretrainedModel):
                 "amago.nets.traj_encoders.TformerTrajEncoder.attention_type": amago.nets.transformer.FlashAttention,
                 "amago.nets.transformer.FlashAttention.window_size": (32, 0),
             },
+            battle_backend="pokeagent",
         )
 
 
@@ -562,12 +597,13 @@ class Abra(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("DefaultActionSpace"),
-            observation_space=get_observation_space("TeamPreviewObservationSpace"),
+            observation_space=get_observation_space("PAC-TeamPreviewObservationSpace"),
             tokenizer=get_tokenizer("DefaultObservationSpace-v1"),
             gin_overrides={
                 "amago.nets.traj_encoders.TformerTrajEncoder.attention_type": amago.nets.transformer.FlashAttention,
                 "amago.nets.transformer.FlashAttention.window_size": (32, 0),
             },
+            battle_backend="pokeagent",
         )
 
 
@@ -588,11 +624,51 @@ class Minikazam(PretrainedModel):
             train_gin_config="binary_rl.gin",
             default_checkpoint=40,
             action_space=get_action_space("DefaultActionSpace"),
-            observation_space=get_observation_space("OpponentMoveObservationSpace"),
+            observation_space=get_observation_space("PAC-OpponentMoveObservationSpace"),
             reward_function=get_reward_function("AggressiveShapedReward"),
             tokenizer=get_tokenizer("DefaultObservationSpace-v1"),
+            battle_backend="pokeagent",
         )
 
     @property
     def base_config(self):
-        return {"MetamonPerceiverTstepEncoder.tokenizer": self.tokenizer}
+        return {
+            "MetamonPerceiverTstepEncoder.tokenizer": self.tokenizer,
+            "amago.nets.transformer.SigmaReparam.fast_init": True,
+        }
+
+
+##############################################
+## 100% Correct PokéAgent Challenge Aliases ##
+##############################################
+
+# These policies use the unpatched observation space. They will play (slightly) better
+# than the main version when the backend is correctly specified as "pokeagent", because
+# they can see the tera types that appear when the agent or opponent uses tera in battle.
+
+
+@pretrained_model("PAC-SmallRLGen9Beta")
+class PACSmallRLGen9Beta(SmallRLGen9Beta):
+    def __init__(self):
+        super().__init__()
+        self.observation_space.base_obs_space = get_observation_space(
+            "TeamPreviewObservationSpace"
+        )
+
+
+@pretrained_model("PAC-Abra")
+class PACAbra(Abra):
+    def __init__(self):
+        super().__init__()
+        self.observation_space.base_obs_space = get_observation_space(
+            "TeamPreviewObservationSpace"
+        )
+
+
+@pretrained_model("PAC-Minikazam")
+class PACMinikazam(Minikazam):
+    def __init__(self):
+        super().__init__()
+        self.observation_space.base_obs_space = get_observation_space(
+            "OpponentMoveObservationSpace"
+        )
