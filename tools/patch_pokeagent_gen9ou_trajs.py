@@ -127,7 +127,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate input
     if args.filelist is None and args.input_dir is None:
         raise ValueError("Must provide either --filelist or --input_dir")
 
@@ -136,34 +135,28 @@ def main():
     trajectory_files = []
 
     if args.filelist:
-        # Load from filelist
         print(f"Loading file list from: {args.filelist}", flush=True)
         with open(args.filelist, "r") as f:
             for line in tqdm(f, desc="Reading file list"):
                 input_path = line.strip()
                 if not input_path:
                     continue
-                # For filelist mode, we need to figure out relative path for output
-                # Use basename since we don't have a clear input_dir
                 filename = os.path.basename(input_path)
                 output_path = os.path.join(args.output_dir, filename)
                 trajectory_files.append((input_path, output_path))
         print(f"\nLoaded {len(trajectory_files)} files from filelist", flush=True)
     else:
-        # find files on disk
         if not os.path.exists(args.input_dir):
             raise ValueError(f"Input directory does not exist: {args.input_dir}")
 
         pattern_glob = os.path.join(args.input_dir, "**", f"*{args.pattern}")
         print(f"Searching for files matching: {pattern_glob}")
 
-        # Optimize: compute prefix length once instead of calling relpath millions of times
         input_dir_prefix_len = len(args.input_dir.rstrip(os.sep)) + 1
 
         for input_path in tqdm(
             iglob(pattern_glob, recursive=True), desc="Finding trajectory files"
         ):
-            # Fast relative path computation by string slicing instead of os.path.relpath
             rel_path = input_path[input_dir_prefix_len:]
             output_path = os.path.join(args.output_dir, rel_path)
             trajectory_files.append((input_path, output_path))
